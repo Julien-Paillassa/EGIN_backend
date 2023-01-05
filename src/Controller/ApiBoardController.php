@@ -17,12 +17,12 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
- * @Route("/api/board")
+ * @Route("/apip/board")
  */
 class ApiBoardController extends AbstractController
 {
     /**
-     * @Route("/", name="_api_board_index", methods={"GET"})
+     * @Route("/", name="_apip_board_index", methods={"GET"})
      */
     public function index(BoardRepository $boardRepository): Response
     {
@@ -32,7 +32,7 @@ class ApiBoardController extends AbstractController
 
 
     /**
-     * @Route("/add", name="_api_board_add", methods={"GET", "POST"})
+     * @Route("/add", name="_apip_board_add", methods={"GET", "POST"})
      */
     public function addBoard(Request $request, BoardRepository $boardRepository, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator)
     {
@@ -60,7 +60,7 @@ class ApiBoardController extends AbstractController
     }
 
     /**
-     * @Route("/new", name="app_api_board_new", methods={"GET", "POST"})
+     * @Route("/new", name="app_apip_board_new", methods={"GET", "POST"})
      */
     public function new(Request $request, BoardRepository $boardRepository): Response
     {
@@ -71,27 +71,27 @@ class ApiBoardController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $boardRepository->add($board, true);
 
-            return $this->redirectToRoute('app_api_board_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_apip_board_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->renderForm('api_board/new.html.twig', [
+        return $this->renderForm('apip_board/new.html.twig', [
             'board' => $board,
             'form' => $form,
         ]);
     }
 
     /**
-     * @Route("/{id}", name="app_api_board_show", methods={"GET"})
+     * @Route("/{id}", name="app_apip_board_show", methods={"GET"})
      */
     public function show(Board $board): Response
     {
-        return $this->render('api_board/show.html.twig', [
+        return $this->render('apip_board/show.html.twig', [
             'board' => $board,
         ]);
     }
 
     /**
-     * @Route("/{id}/edit", name="app_api_board_edit", methods={"GET", "POST"})
+     * @Route("/{id}/edit", name="app_apip_board_edit", methods={"GET", "POST"})
      */
     public function edit(Request $request, Board $board, BoardRepository $boardRepository): Response
     {
@@ -101,17 +101,17 @@ class ApiBoardController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $boardRepository->add($board, true);
 
-            return $this->redirectToRoute('app_api_board_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_apip_board_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->renderForm('api_board/edit.html.twig', [
+        return $this->renderForm('apip_board/edit.html.twig', [
             'board' => $board,
             'form' => $form,
         ]);
     }
 
     /**
-     * @Route("/{id}", name="app_api_board_delete", methods={"POST"})
+     * @Route("/{id}", name="app_apip_board_delete", methods={"POST"})
      */
     public function delete(Request $request, Board $board, BoardRepository $boardRepository): Response
     {
@@ -119,6 +119,6 @@ class ApiBoardController extends AbstractController
             $boardRepository->remove($board, true);
         }
 
-        return $this->redirectToRoute('app_api_board_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_apip_board_index', [], Response::HTTP_SEE_OTHER);
     }
 }

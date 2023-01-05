@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\BoardRepository;
@@ -12,7 +13,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=BoardRepository::class)
- * @ApiResource()
+ * @ApiResource(
+ *      attributes={"pagination_enabled"=false, "normalization_context"={"skip_null_values" = false,"groups"={"board"}},"order"={"name": "ASC"} }
+ * )
  */
 class Board
 {
@@ -61,9 +64,19 @@ class Board
      */
     private $dimension;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="boards")
+     */
+    private $category;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=User::class, inversedBy="boards")
+     */
+    private $user;
+
     public function __construct()
     {
-        $this->boards = new ArrayCollection();
+        $this->user = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -139,6 +152,42 @@ class Board
     public function setDimension(?string $dimension): self
     {
         $this->dimension = $dimension;
+
+        return $this;
+    }
+
+    public function getCategory(): ?Category
+    {
+        return $this->category;
+    }
+
+    public function setCategory(?Category $category): self
+    {
+        $this->category = $category;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUser(): Collection
+    {
+        return $this->user;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->user->contains($user)) {
+            $this->user[] = $user;
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        $this->user->removeElement($user);
 
         return $this;
     }

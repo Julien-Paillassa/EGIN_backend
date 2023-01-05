@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\SpotRepository;
@@ -39,6 +41,21 @@ class Spot
      * @ORM\Column(type="text", nullable=true)
      */
     private $description;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=User::class, mappedBy="spots")
+     */
+    private $users;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=SpotType::class, inversedBy="spots")
+     */
+    private $type;
+
+    public function __construct()
+    {
+        $this->users = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -89,6 +106,45 @@ class Spot
     public function setDescription(?string $description): self
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->addSpot($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->removeElement($user)) {
+            $user->removeSpot($this);
+        }
+
+        return $this;
+    }
+
+    public function getType(): ?SpotType
+    {
+        return $this->type;
+    }
+
+    public function setType(?SpotType $type): self
+    {
+        $this->type = $type;
 
         return $this;
     }
