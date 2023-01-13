@@ -55,6 +55,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $level;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $uid;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $apiToken;
+
     public function __construct()
     {
         $this->boards = new ArrayCollection();
@@ -209,6 +219,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLevel(?Level $level): self
     {
         $this->level = $level;
+
+        return $this;
+    }
+
+    public function getUid(): ?string
+    {
+        return $this->uid;
+    }
+
+    public function setUid(?string $uid): self
+    {
+        $this->uid = $uid;
+
+        return $this;
+    }
+
+    public function getApiToken(): ?string
+    {
+        return $this->apiToken;
+    }
+
+    public function setApiToken(string $apiToken): self
+    {
+        $this->apiToken = $apiToken;
 
         return $this;
     }
