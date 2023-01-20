@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Board;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\Persistence\ObjectManager;
 use Error;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,14 +15,19 @@ use Stripe;
 use Stripe\Stripe as StripeStripe;
 use Symfony\Component\Validator\Constraints\Json;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Psr\Log\LoggerInterface;
 
 class PaymentController extends AbstractController
 {
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, LoggerInterface $logger)
     {
         $this->em = $em;
+        $this->logger = $logger;
     }
+
+    private $logger;
+    private $em;
 
     /**
      * @Route("/payment", name="app_payment")
@@ -52,11 +58,15 @@ class PaymentController extends AbstractController
         $YOUR_DOMAIN = 'http://localhost:4200';
 
         $checkout_session = \Stripe\Checkout\Session::create([
+            "metadata" => ["board_id" => $board->getId()],
             'line_items' => [[
+                // 'metadata' => [
+                //     'boardId' => $board->getId(), //TODO: set this as the board ID
+                // ],
                 # Provide the exact Price ID (e.g. pr_1234) of the product you want to sell
                 'price_data' => [
                     'currency' => 'usd',
-                    'unit_amount' => 20000,
+                    'unit_amount' => $board->getPrice(), // TODO: set this as the board price
                     'product_data' => [
                         'name' => $board->getName(),
                         'description' => $board->getDescription(),
@@ -65,61 +75,79 @@ class PaymentController extends AbstractController
                 ],
                 'quantity' => 1,
             ]],
-            //'mode' => 'payment',
             'mode' => 'payment',
             'success_url' => $YOUR_DOMAIN . '/success?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => $YOUR_DOMAIN . '/cancel.html',
         ]);
+        $this->logger->info($checkout_session);
         return new JsonResponse($checkout_session);
     }
 
     /**
      * @Route("api/webhooks", name="app_payment_webhooks")
      */
-    // public function WebHook(Request $request)
-    // {
-    //     $endpoint_secret = 'pk_test_51MRtOJAGoQFo1sGmJTl83iKv6B9S24CxTYE64SzeoahKifATctHmaBifnn0V9d057uKsV1uPZ3wLSAiVkqGtoZSi00ivQA2BSV';
+    public function WebHook(Request $request, ObjectManager $manager)
+    {
+        Stripe\Stripe::setApiKey($_ENV["STRIPE_SECRET"]);
 
-    //     $payload = @file_get_contents('php://input');
-    //     $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
-    //     $event = null;
+        $endpoint_secret = 'whsec_c400668053295ecd639d14e67f98c80fa8b29838be89a12ccac54ac1687d2438';
 
-    //     try {
-    //         $event = \Stripe\Webhook::constructEvent(
-    //             $payload,
-    //             $endpoint_secret,
-    //             $sig_header
-    //         );
+        $payload = @file_get_contents('php://input');
+        $event = null;
 
-    //         //, $sig_header
-    //     } catch (\UnexpectedValueException $e) {
-    //         // Invalid payload
-    //         return new Response(Response::HTTP_BAD_REQUEST);
-    //         exit();
-    //     } catch (\Stripe\Exception\SignatureVerificationException $e) {
-    //         // Invalid signature
-    //         return new Response(Response::HTTP_BAD_REQUEST);
-    //         exit();
-    //     }
+        try {
+            $event = \Stripe\Event::constructFrom(
+                json_decode($payload, true)
+            );
+        } catch (\UnexpectedValueException $e) {
+            // Invalid payload
+            echo '⚠️  Webhook error while parsing basic request.';
+            http_response_code(400);
+            exit();
+        }
 
-    //     // Handle the event
-    //     switch ($event->type) {
-    //         case 'payment_intent.succeeded':
-    //             $paymentIntent = $event->data->object; // contains a StripePaymentIntent
-    //             handlePaymentIntentSucceeded($paymentIntent);
-    //             break;
-    //         case 'payment_method.attached':
-    //             $paymentMethod = $event->data->object; // contains a StripePaymentMethod
-    //             handlePaymentMethodAttached($paymentMethod);
-    //             break;
-    //             // ... handle other event types
-    //         default:
-    //             // Unexpected event type
+        if ($endpoint_secret) {
+            // Only verify the event if there is an endpoint secret defined
+            // Otherwise use the basic decoded event
+            $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
+            try {
+                $event = \Stripe\Webhook::constructEvent(
+                    $payload,
+                    $sig_header,
+                    $endpoint_secret
+                );
+            } catch (\Stripe\Exception\SignatureVerificationException $e) {
+                // Invalid signature
+                echo '⚠️  Webhook error while validating signature.';
+                http_response_code(400);
+                exit();
+            }
+        }
 
-    //             return new Response(Response::HTTP_BAD_REQUEST);
-    //             exit();
-    //     }
+        // Handle the event
+        switch ($event->type) {
+            case 'checkout.session.completed':
+                $this->logger->info('TATA!');
+                $this->logger->info($event->data->object->metadata->board_id);
+                $this->logger->info('TOTO!');
 
-    //     return new Response(Response::HTTP_OK);
-    // }
+                $board =  $this->em->getRepository(Board::class)->findOneBy(['id' => $event->data->object->metadata->board_id]);
+                $board->setStatus('SOLD');
+                $manager->persist($board);
+                $manager->flush();
+
+                //TODO: $event.data.object.metadata.boardId
+                // TODO: Set the board status to sold
+                //$paymentIntent = $event->data->object; // contains a \Stripe\PaymentIntent
+                // Then define and call a method to handle the successful payment intent.
+                // handlePaymentIntentSucceeded($paymentIntent);
+
+                break;
+            default:
+                // Unexpected event type
+                error_log('Received unknown event type');
+        }
+
+        return new Response(Response::HTTP_OK);
+    }
 }

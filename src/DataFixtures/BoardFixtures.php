@@ -19,6 +19,8 @@ class BoardFixtures extends Fixture implements DependentFixtureInterface
         $board->setSize('5\'11');
         $board->setVolume('30L');
         $board->setDimension(' x 19\' 3/4" x 2\' 7/16" ');
+        $board->setPrice(100);
+        $board->setStatus('disponible');
         $manager->persist($board);
         $this->addReference('board_0', $board);
 
@@ -29,6 +31,8 @@ class BoardFixtures extends Fixture implements DependentFixtureInterface
         $board->setSize('9\'1');
         $board->setVolume('62L');
         $board->setDimension(' x 19\' 3/4" x 2\' 7/16" ');
+        $board->setPrice(200);
+        $board->setStatus('disponible');
         $manager->persist($board);
         $this->addReference('board_1', $board);
 
@@ -39,6 +43,8 @@ class BoardFixtures extends Fixture implements DependentFixtureInterface
         $board->setSize('5\'6');
         $board->setVolume('31L');
         $board->setDimension(' x 19\' 3/4" x 2\' 7/16" ');
+        $board->setPrice(1000);
+        $board->setStatus('disponible');
         $manager->persist($board);
         $this->addReference('board_2', $board);
 
@@ -49,6 +55,8 @@ class BoardFixtures extends Fixture implements DependentFixtureInterface
         $board->setSize('6\'4');
         $board->setVolume('37L');
         $board->setDimension(' x 19\' 3/4" x 2\' 7/16" ');
+        $board->setPrice(2000);
+        $board->setStatus('disponible');
         $manager->persist($board);
         $this->addReference('board_3', $board);
 
