@@ -16,6 +16,8 @@ use Stripe\Stripe as StripeStripe;
 use Symfony\Component\Validator\Constraints\Json;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 class PaymentController extends AbstractController
 {
@@ -87,7 +89,7 @@ class PaymentController extends AbstractController
     /**
      * @Route("api/webhooks", name="app_payment_webhooks")
      */
-    public function WebHook(Request $request)
+    public function WebHook(MailerInterface $mailer)
     {
         Stripe\Stripe::setApiKey($_ENV["STRIPE_SECRET"]);
 
@@ -128,17 +130,24 @@ class PaymentController extends AbstractController
         // Handle the event
         switch ($event->type) {
             case 'checkout.session.completed':
-                $this->logger->info('TATA!');
-                $this->logger->info($event->data->object->metadata->board_id);
-                $this->logger->info('TOTO!');
 
                 $board =  $this->em->getRepository(Board::class)->findOneBy(['id' => $event->data->object->metadata->board_id]);
                 $board->setStatus('SOLD');
                 $this->em->persist($board);
                 $this->em->flush();
 
-                //TODO: $event.data.object.metadata.boardId
-                // TODO: Set the board status to sold
+                $email = (new Email())
+                    ->from('julien.paillassa@egmail.com')
+                    ->to('julien.paillassa@gmail.com')
+                    //->cc('cc@example.com')
+                    //->bcc('bcc@example.com')
+                    //->replyTo('fabien@example.com')
+                    //->priority(Email::PRIORITY_HIGH)
+                    ->subject('Time for Symfony Mailer!')
+                    ->text('Sending emails is fun again!')
+                    ->html('<p>See Twig integration for better HTML integration!</p>');
+
+                $mailer->send($email);
                 //$paymentIntent = $event->data->object; // contains a \Stripe\PaymentIntent
                 // Then define and call a method to handle the successful payment intent.
                 // handlePaymentIntentSucceeded($paymentIntent);
