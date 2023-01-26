@@ -29,6 +29,7 @@ class PaymentController extends AbstractController
     private $logger;
     private $em;
 
+
     /**
      * @Route("/payment", name="app_payment")
      */
@@ -79,14 +80,14 @@ class PaymentController extends AbstractController
             'success_url' => $YOUR_DOMAIN . '/success?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => $YOUR_DOMAIN . '/cancel.html',
         ]);
-        $this->logger->info($checkout_session);
+
         return new JsonResponse($checkout_session);
     }
 
     /**
      * @Route("api/webhooks", name="app_payment_webhooks")
      */
-    public function WebHook(Request $request, ObjectManager $manager)
+    public function WebHook(Request $request)
     {
         Stripe\Stripe::setApiKey($_ENV["STRIPE_SECRET"]);
 
@@ -133,8 +134,8 @@ class PaymentController extends AbstractController
 
                 $board =  $this->em->getRepository(Board::class)->findOneBy(['id' => $event->data->object->metadata->board_id]);
                 $board->setStatus('SOLD');
-                $manager->persist($board);
-                $manager->flush();
+                $this->em->persist($board);
+                $this->em->flush();
 
                 //TODO: $event.data.object.metadata.boardId
                 // TODO: Set the board status to sold

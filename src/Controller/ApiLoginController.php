@@ -18,6 +18,9 @@ class ApiLoginController extends AbstractController
         $this->logger = $logger;
     }
 
+    private $logger;
+    private $em;
+
 
     /**
      * @Route("/api/login", name="app_login")
