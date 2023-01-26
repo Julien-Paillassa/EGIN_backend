@@ -6,7 +6,7 @@ app_logout:
   methods: GET
 
 authentication_token:
-  path: /api
+  path: /authentication_token
   methods: ["POST"]
 
 api_login_check:

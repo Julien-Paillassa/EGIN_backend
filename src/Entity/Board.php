@@ -74,6 +74,20 @@ class Board
      */
     private $user;
 
+    /**
+     * @ORM\Column(type="integer")
+     * @Groups({"board"})
+     */
+    private $Price;
+
+    /**
+     * @ORM\Column(type="string", length=100, nullable=true)
+     * @Groups({"board"})
+     */
+    private $status;
+
+    // TODO: add price and status 
+
     public function __construct()
     {
         $this->user = new ArrayCollection();
@@ -188,6 +202,30 @@ class Board
     public function removeUser(User $user): self
     {
         $this->user->removeElement($user);
+
+        return $this;
+    }
+
+    public function getPrice(): ?int
+    {
+        return $this->Price;
+    }
+
+    public function setPrice(int $Price): self
+    {
+        $this->Price = $Price;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?string $status): self
+    {
+        $this->status = $status;
 
         return $this;
     }
