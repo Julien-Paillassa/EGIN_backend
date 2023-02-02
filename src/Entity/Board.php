@@ -77,6 +77,7 @@ class Board
     /**
      * @ORM\Column(type="integer")
      * @Groups({"board"})
+     * @Assert\Positive()
      */
     private $Price;
 
@@ -85,8 +86,6 @@ class Board
      * @Groups({"board"})
      */
     private $status;
-
-    // TODO: add price and status 
 
     public function __construct()
     {
