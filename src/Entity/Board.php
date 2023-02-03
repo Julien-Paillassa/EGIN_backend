@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\BoardRepository;
@@ -12,7 +13,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=BoardRepository::class)
- * @ApiResource()
+ * @ApiResource(
+ *      attributes={"pagination_enabled"=false, "normalization_context"={"skip_null_values" = false,"groups"={"board"}},"order"={"name": "ASC"} }
+ * )
+ * [Post(security: "is_granted('ROLE_ADMIN')")]
+ * [Delete(security: "is_granted('ROLE_ADMIN')")]
  */
 class Board
 {
@@ -61,9 +66,32 @@ class Board
      */
     private $dimension;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="boards")
+     */
+    private $category;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=User::class, inversedBy="boards")
+     */
+    private $user;
+
+    /**
+     * @ORM\Column(type="integer")
+     * @Groups({"board"})
+     * @Assert\Positive()
+     */
+    private $Price;
+
+    /**
+     * @ORM\Column(type="string", length=100, nullable=true)
+     * @Groups({"board"})
+     */
+    private $status;
+
     public function __construct()
     {
-        $this->boards = new ArrayCollection();
+        $this->user = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -139,6 +167,66 @@ class Board
     public function setDimension(?string $dimension): self
     {
         $this->dimension = $dimension;
+
+        return $this;
+    }
+
+    public function getCategory(): ?Category
+    {
+        return $this->category;
+    }
+
+    public function setCategory(?Category $category): self
+    {
+        $this->category = $category;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUser(): Collection
+    {
+        return $this->user;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->user->contains($user)) {
+            $this->user[] = $user;
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        $this->user->removeElement($user);
+
+        return $this;
+    }
+
+    public function getPrice(): ?int
+    {
+        return $this->Price;
+    }
+
+    public function setPrice(int $Price): self
+    {
+        $this->Price = $Price;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?string $status): self
+    {
+        $this->status = $status;
 
         return $this;
     }
