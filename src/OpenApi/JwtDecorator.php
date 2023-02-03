@@ -13,6 +13,8 @@ final class JwtDecorator implements OpenApiFactoryInterface
         $this->decorated = $decorated;
     }
 
+    private $decorated;
+
     public function __invoke(array $context = []): OpenApi
     {
         $openApi = ($this->decorated)($context);
@@ -32,11 +34,11 @@ final class JwtDecorator implements OpenApiFactoryInterface
             'properties' => [
                 'email' => [
                     'type' => 'string',
-                    'example' => 'johndoe@example.com',
+                    'example' => 'kelly.slater@gmail.com',
                 ],
                 'password' => [
                     'type' => 'string',
-                    'example' => 'apassword',
+                    'example' => 'kelly',
                 ],
             ],
         ]);

@@ -137,15 +137,11 @@ class PaymentController extends AbstractController
                 $this->em->flush();
 
                 $email = (new Email())
-                    ->from('julien.paillassa@egmail.com')
+                    ->from('julien.paillassa@test.com')
                     ->to('julien.paillassa@gmail.com')
-                    //->cc('cc@example.com')
-                    //->bcc('bcc@example.com')
-                    //->replyTo('fabien@example.com')
-                    //->priority(Email::PRIORITY_HIGH)
-                    ->subject('Time for Symfony Mailer!')
+                    ->subject('Confirmation commande EGIN')
                     ->text('Sending emails is fun again!')
-                    ->html('<p>See Twig integration for better HTML integration!</p>');
+                    ->html('<p>Nous vous remercions de votre commande et vous informons que celle-ci a bien été prise en compte et vous sera envoyer dans la plus bref délai. Bonne Journée et à bientôt sur EGIN.</p>');
 
                 $mailer->send($email);
                 //$paymentIntent = $event->data->object; // contains a \Stripe\PaymentIntent

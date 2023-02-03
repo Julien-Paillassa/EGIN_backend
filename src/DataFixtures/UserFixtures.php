@@ -20,6 +20,8 @@ class UserFixtures extends Fixture
     {
         $contributor = new User();
         $contributor->setEmail('kelly.slater@gmail.com');
+        $contributor->setFirstName('Slater');
+        $contributor->setLastName('Kelly');
         $contributor->setRoles(['ROLE_CONTRIBUTOR']);
         $contributor->setPassWord($this->passwordEncoder->encodePassword($contributor, 'kelly'));
         $manager->persist($contributor);
@@ -27,6 +29,8 @@ class UserFixtures extends Fixture
 
         $contributor = new User();
         $contributor->setEmail('mick.fanning@gmail.com');
+        $contributor->setFirstName('Fanning');
+        $contributor->setLastName('Mick');
         $contributor->setRoles(['ROLE_CONTRIBUTOR']);
         $contributor->setPassWord($this->passwordEncoder->encodePassword($contributor, 'mick'));
         $manager->persist($contributor);
@@ -34,6 +38,8 @@ class UserFixtures extends Fixture
 
         $admin = new User();
         $admin->setEmail('laird.hamilton@gmail.com');
+        $admin->setFirstName('Hamilton');
+        $admin->setLastName('Laird');
         $admin->setRoles(['ROLE_ADMIN']);
         $admin->setPassWord($this->passwordEncoder->encodePassword($admin, 'hamilton'));
         $manager->persist($admin);
