@@ -16,6 +16,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ApiResource(
  *      attributes={"pagination_enabled"=false, "normalization_context"={"skip_null_values" = false,"groups"={"board"}},"order"={"name": "ASC"} }
  * )
+ * [Post(security: "is_granted('ROLE_ADMIN')")]
+ * [Delete(security: "is_granted('ROLE_ADMIN')")]
  */
 class Board
 {
